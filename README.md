@@ -8,6 +8,12 @@ para o Lemmatizer do OpenNLP.
 Foi criado devido a dificuldade de localizar ou real inexistência de um arquivo no formato
 esperado pelo OpenNLP.
 
+## Como Utilizar
+
+* Faça o clone do projeto
+* Importe o projeto no Eclipse
+* Execute a main `org.opennlp.dict.generator.LemmatizerDictionaryGenerator.main`
+
 # License
 
 http://www.apache.org/licenses/LICENSE-2.0
