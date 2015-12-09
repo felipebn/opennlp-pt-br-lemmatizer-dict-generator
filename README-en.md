@@ -3,6 +3,8 @@ Lemma dictionary generator for OpenNLP's Lemmatizer base on CoGrOO PT-BR diction
 
 This generator uses CoGrOO dictionaries to generate a file which can be use as input for OpenNLP's Lemmatizer.
 
+Lemmas are discovered using UNITEX-PB dictionary and lemmatizer.
+
 I made it because it was to hard to find an already formated dictionary expected by OpenNLP's Lemmatizer. 
 
 ## How to use
@@ -10,6 +12,18 @@ I made it because it was to hard to find an already formated dictionary expected
 * Clone this repository
 * Import the project using Eclipse
 * Run `org.opennlp.dict.generator.LemmatizerDictionaryGenerator.main`
+
+## Ouput tags
+
+This program will discard or convert some UNITEX tags for convenience as follows:
+
+Original | Converted
+--- | ---
+DET+Art******** | DET+Art
+DET+Num******** | DET+Num
+PREP******** | DET+Art 
+Class+******** | Class
+
 
 # License
 

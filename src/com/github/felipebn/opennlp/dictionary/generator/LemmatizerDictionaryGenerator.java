@@ -24,6 +24,9 @@ import java.util.Iterator;
 import org.cogroo.dictionary.impl.FSADictionary;
 import org.cogroo.util.PairWordPOSTag;
 
+import com.google.common.collect.Table.Cell;
+import com.google.common.collect.TreeBasedTable;
+
 /**
  * Dictionary generator using Jspell dictionary
  * and UNITEX tagging.
@@ -54,31 +57,47 @@ public class LemmatizerDictionaryGenerator {
 	public void generatePtBr() throws IllegalArgumentException, IOException{
 		PrintWriter writer = new PrintWriter(this.output);
 		UnitexLemmatizer unitex = new UnitexLemmatizer("unitex-pb.inf", "Alphabet.txt");
+		
 		try{
-			
 			FSADictionary dict = FSADictionary.createFromResources("/fsa_dictionaries/pos/pt_br_jspell.dict");
 			Iterator<String> it = dict.iterator();
 			
 			//Flush counter
 			int f = 0;
 			
+			//Build output table making every row unique and naturally ordered by word
+			System.out.println( "Building output table on memory..." );
+			TreeBasedTable<String, String, String> output = TreeBasedTable.<String, String, String>create();
 			while( it.hasNext() ){
-				final String palavra = it.next();
-				//Collection<PairWordPOSTag> tagsAndLemms = dict.getTagsAndLemms(palavra);
-				Collection<PairWordPOSTag> tagsAndLemms = unitex.getLemmas(palavra);
-				for (PairWordPOSTag lemmaAndTag : tagsAndLemms) {				
-					writer.write( String.format("%s\t%s\t%s\n",palavra,lemmaAndTag.getPosTag(),lemmaAndTag.getWord()) );
-					if( ++f % 1000 == 0 ){
-						System.out.println( String.format("Flush (%d)",f) );
-						writer.flush();
-					}
+				final String word = it.next();
+				Collection<PairWordPOSTag> tagsAndLemms = unitex.getLemmas(word);
+				for (PairWordPOSTag lemmaAndTag : tagsAndLemms) {
+					output.put(word, lemmaAndTag.getPosTag(),lemmaAndTag.getWord());
 				}
 			}
+			
+			//Store unique pos tags to be printed when finished
+			final String uniquePosTags = output.columnKeySet().toString();
+			
+			//Writes to file
+			Iterator<Cell<String, String, String>> rows = output.cellSet().iterator();
+			while (rows.hasNext()) {
+				Cell<String, String, String> r = rows.next();
+				writer.println( String.format("%s\t%s\t%s",r.getRowKey(),r.getColumnKey(),r.getValue()) );
+				if( ++f % 1000 == 0 ){
+					System.out.println( String.format("Flushing (%d) ...",f) );
+					writer.flush();
+				}
+				rows.remove();
+			}
+			
+			System.out.println( "Unique postags:" + uniquePosTags );
 		}finally{
 			unitex.destroy();
 			writer.flush();
 			writer.close();
 		}
+		
 	}
 	
 	
@@ -89,7 +108,7 @@ public class LemmatizerDictionaryGenerator {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IllegalArgumentException, IOException {
-		new LemmatizerDictionaryGenerator(new File("pt-lemmatizer.dict"))
+		new LemmatizerDictionaryGenerator(new File("pt-br-lemmatizer.dict"))
 			.generatePtBr();
 	}
 }
