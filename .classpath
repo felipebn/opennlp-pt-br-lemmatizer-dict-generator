@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="lib/cogroo-nlp-4.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/cogroo-res-pt_br-4.0.0.jar"/>
 	<classpathentry kind="lib" path="lib/guava-14.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/cogroo-ann-4.0.0.jar"/>
+	<classpathentry kind="lib" path="lib/cogroo-ann-pt_br-4.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

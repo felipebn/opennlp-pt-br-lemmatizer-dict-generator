@@ -18,14 +18,16 @@ package com.github.felipebn.opennlp.dictionary.generator;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.cogroo.dictionary.impl.FSADictionary;
 import org.cogroo.util.PairWordPOSTag;
 
 /**
- * Dictionary generator
+ * Dictionary generator using Jspell dictionary
+ * and UNITEX tagging.
+ * 
  * @author felipebn
  *
  */
@@ -44,32 +46,36 @@ public class LemmatizerDictionaryGenerator {
 	 * Iterates through the Jspell dictionary building the output to
 	 * be used as input on OpneNLP Lemmatizer.
 	 * 
+	 * The posTags outputed will be in UNITEX format.
+	 * 
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 */
 	public void generatePtBr() throws IllegalArgumentException, IOException{
 		PrintWriter writer = new PrintWriter(this.output);
-		
-		try{	
+		UnitexLemmatizer unitex = new UnitexLemmatizer("unitex-pb.inf", "Alphabet.txt");
+		try{
+			
 			FSADictionary dict = FSADictionary.createFromResources("/fsa_dictionaries/pos/pt_br_jspell.dict");
 			Iterator<String> it = dict.iterator();
 			
+			//Flush counter
+			int f = 0;
+			
 			while( it.hasNext() ){
-				
-				String palavra = it.next();
-				List<PairWordPOSTag> tagsAndLemms = dict.getTagsAndLemms(palavra);
-				for (PairWordPOSTag lemmaAndTag : tagsAndLemms) {
-					String tag = lemmaAndTag.getPosTag();
-					
-					//Ignores punctuations
-					if( tag.matches("^[^\\w]+$") ) continue;
-					
-					String lemma = lemmaAndTag.getWord();
-					writer.write( String.format("%s\t%s\t%s\n",palavra,tag,lemma) );
-					
+				final String palavra = it.next();
+				//Collection<PairWordPOSTag> tagsAndLemms = dict.getTagsAndLemms(palavra);
+				Collection<PairWordPOSTag> tagsAndLemms = unitex.getLemmas(palavra);
+				for (PairWordPOSTag lemmaAndTag : tagsAndLemms) {				
+					writer.write( String.format("%s\t%s\t%s\n",palavra,lemmaAndTag.getPosTag(),lemmaAndTag.getWord()) );
+					if( ++f % 1000 == 0 ){
+						System.out.println( String.format("Flush (%d)",f) );
+						writer.flush();
+					}
 				}
 			}
 		}finally{
+			unitex.destroy();
 			writer.flush();
 			writer.close();
 		}
